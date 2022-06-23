@@ -72,6 +72,41 @@ def ball(pts, pc=None, r=1.0):
         pc = [0, 0, 0]
     return circle(pts, pc, r)
 
+def cylinder(pts, pc=None, r=1.0, h=1.0):
+    """
+    a signed distance function, negative inside the domain
+    generate cylinder oriented on the z axis in 3D
+    if pc= None > pc is set to pc = [0, 0, h/2]
+
+
+    """
+    if pc is None:
+        pc = [0, 0, h/2]
+    d_xy = circle(pts[:, :2], pc[:2], r)
+    # print(f"{d_xy=}")
+    d_z = np.abs(pts[:, -1]-pc[2]) - h/2
+    # print(f"{d_z=}")
+
+    is_in_cyl= np.int64(d_xy <= 0) 
+    is_in_cyl_n= np.int64(d_xy > 0) 
+    is_btw_planes= np.int64(d_z <= 0)
+    is_btw_planes_n= np.int64(d_z > 0)
+    d_euc= np.sqrt(d_z**2 + d_xy**2)
+    d_max= np.maximum(d_xy, d_z) 
+
+    # if d_xy <= 0: # is in the infinite cylinder
+    #     if d_z< = 0: # is between both planes at h/2
+    #         d= np.maximum(d_xy, d_z) 
+    #     else:
+    #         d= d_z
+    # else:
+    #     if d_z< = 0: # is between both planes at h/2
+    #         d= d_xy 
+    #     else:
+    #         d= np.sqrt(d_z**2 + d_xy**2)
+
+
+    return is_in_cyl*(is_btw_planes*d_max + is_btw_planes_n*d_z)+ is_in_cyl_n*(is_btw_planes*d_xy + is_btw_planes_n*d_euc)
 
 def unit_ball(pts):
     """generate unit ball in 3D"""
